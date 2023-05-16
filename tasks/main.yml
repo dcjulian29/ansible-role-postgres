@@ -1,0 +1,51 @@
+---
+- name: Ensure Postgres container group exists with correct gid.
+  ansible.builtin.group:
+    gid: "{{ postgres_gid }}"
+    name: "{{ postgres_group }}"
+    state: present
+
+- name: Ensure Postgres directories exist.
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    owner: 999
+    group: "{{ postgres_gid }}"
+    mode: 0700
+  with_items: "{{ postgres_volumes }}"
+
+- name: Pull Postgres container image.
+  community.docker.docker_image:
+    name: "{{ postgres_server_image }}"
+    source: pull
+    tag: "{{ postgres_server_version }}"
+  notify: Remove postgres
+
+- name: Ensure all handlers run before continuing
+  ansible.builtin.meta: flush_handlers
+
+- name: Ensure Postgres container is created.
+  community.docker.docker_container:
+    container_default_behavior: no_defaults
+    detach: true
+    env:
+      TZ: "{{ ansible_date_time.tz }}"
+      POSTGRES_DB: "{{ postgres_database_name }}"
+      POSTGRES_USER: "{{ postgres_database_user }}"
+      POSTGRES_PASSWORD: "{{ postgres_database_password }}"
+    image: "{{ postgres_server_image }}:{{ postgres_server_version }}"
+    interactive: false
+    name: "{{ postgres_name }}"
+    published_ports: >-
+        {{
+          [ postgres_server_port ~ ':5432' ]
+          if postgres_server_port_exposed else omit
+        }}
+    restart_policy: always
+    state: present
+    volumes: "{{ postgres_volumes_docker }}"
+    user: "0:{{ postgres_gid }}"
+  notify: Restart postgres
+
+- name: Force all notified handlers to run at this point
+  ansible.builtin.meta: flush_handlers

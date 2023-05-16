@@ -1,0 +1,24 @@
+---
+dependencies:
+  - role: dcjulian29.docker
+galaxy_info:
+  author: Julian Easterling
+  description: Ansible role to install a container running Postgres.
+  galaxy_tags:
+    - postgres
+    - dcjulian29
+  license: Apache-2.0
+  min_ansible_version: 2.14.1
+  namespace: dcjulian29
+  platforms:
+    - name: Debian
+      versions:
+        - bullseye
+    - name: Ubuntu
+      versions:
+        - jammy
+    - name: EL
+      versions:
+        - "9"
+        - "8"
+  role_name: postgres

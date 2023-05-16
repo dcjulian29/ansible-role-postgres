@@ -1,0 +1,17 @@
+---
+postgres_data_dir: /opt
+postgres_database_name: test_{{ ansible_hostname }}
+postgres_database_user: postgres_{{ ansible_hostname }}
+postgres_database_password: abcdefgh12345678!
+postgres_gid: 981
+postgres_group: postgres
+postgres_name: postgres
+postgres_port: 5432
+postgres_server_image: postgres
+postgres_server_port: 5432
+postgres_server_port_exposed: true
+postgres_server_version: latest
+postgres_volumes:
+  - "{{ postgres_data_dir }}/{{ postgres_name }}"
+postgres_volumes_docker:
+  - "{{ postgres_volumes[0] }}:/var/lib/postgresql/data"

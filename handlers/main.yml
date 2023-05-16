@@ -1,0 +1,12 @@
+---
+- name: Remove postgres
+  ansible.builtin.command: "docker stop {{ postgres_name }} && docker rm {{ postgres_name }}"
+  register: results
+  failed_when: >-
+    results is failed and
+    "No such container" not in results.stderr | default(false)
+  changed_when: >-
+    'No such container' not in results.stderr | default(false)
+
+- name: Restart postgres
+  ansible.builtin.command: "docker restart {{ postgres_name }}"
