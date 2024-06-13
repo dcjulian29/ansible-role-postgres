@@ -11,7 +11,7 @@
     state: directory
     owner: 999
     group: "{{ postgres_gid }}"
-    mode: 0700
+    mode: "0700"
   with_items: "{{ postgres_volumes }}"
 
 - name: Pull Postgres container image.
