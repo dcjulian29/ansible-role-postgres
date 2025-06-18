@@ -24,6 +24,11 @@
 - name: Ensure all handlers run before continuing
   ansible.builtin.meta: flush_handlers
 
+- name: If part of multiple containers deployment, ensure network exists
+  community.docker.docker_network:
+    name: "{{ postgres_docker_network }}"
+  when: postgres_docker_network | length > 0
+
 - name: Ensure Postgres container is created.
   community.docker.docker_container:
     container_default_behavior: no_defaults
@@ -36,6 +41,11 @@
     image: "{{ postgres_server_image }}:{{ postgres_server_version }}"
     interactive: false
     name: "{{ postgres_name }}"
+    networks: >-
+      {{
+        [ { 'name': postgres_docker_network } ]
+        if postgres_docker_network | length > 0 else omit
+      }}
     published_ports: >-
         {{
           [ postgres_server_port ~ ':5432' ]
