@@ -5,7 +5,25 @@
     name: "{{ postgres_group }}"
     state: present
 
-- name: Ensure Postgres directories exist.
+- name: Ensure Postgres user exist
+  ansible.builtin.user:
+    create_home: false
+    group: "{{ postgres_group }}"
+    name: "{{ postgres_user }}"
+    uid: "{{ postgres_uid }}"
+
+- name: Ensure Postgres directories exist
+  ansible.builtin.file:
+    path: "{{ (item | string).split(':')[0] }}"
+    state: directory
+    owner: "{{ postgres_uid }}"
+    group: "{{ postgres_gid }}"
+    mode: "0700"
+  with_items:
+    - "{{ postgres_data_dir }}"
+    - "{{ postgres_volume_data }}"
+
+- name: Ensure custom Postgres directories exist
   ansible.builtin.file:
     path: "{{ item }}"
     state: directory
