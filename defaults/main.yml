@@ -1,18 +1,17 @@
 ---
-postgres_data_dir: /opt
-postgres_database_name: test_{{ ansible_hostname }}
-postgres_database_user: postgres_{{ ansible_hostname }}
+postgres_data_dir: /opt/postgres/
+postgres_database_name: "test_{{ ansible_facts['hostname'] }}"
+postgres_database_user: "postgres_{{ ansible_facts['hostname'] }}"
 postgres_database_password: abcdefgh12345678!
 postgres_docker_network: ""
 postgres_gid: 981
 postgres_group: postgres
+postgres_image: postgres
 postgres_name: postgres
 postgres_port: 5432
-postgres_server_image: postgres
-postgres_server_port: 5432
-postgres_server_port_exposed: true
-postgres_server_version: 17
-postgres_volumes:
-  - "{{ postgres_data_dir }}/{{ postgres_name }}"
-postgres_volumes_docker:
-  - "{{ postgres_volumes[0] }}:/var/lib/postgresql/data"
+postgres_port_exposed: false
+postgres_version: 18
+postgres_volumes: []
+  # - "{{ postgres_data_dir }}/backup:/backup"
+postgres_uid: 981
+postgres_user: postgres

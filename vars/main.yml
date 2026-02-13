@@ -1,0 +1,4 @@
+---
+postgres_data_container: "/var/lib/postgresql/{{ (postgres_version | string).split('.')[0] }}/docker"
+postgres_data_host: "{{ postgres_data_dir }}/data"
+postgres_volume_data: "{{ postgres_data_host }}:{{ postgres_data_container }}"
