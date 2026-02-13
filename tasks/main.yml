@@ -1,5 +1,5 @@
 ---
-- name: Ensure Postgres container group exists with correct gid.
+- name: Ensure Postgres group exist
   ansible.builtin.group:
     gid: "{{ postgres_gid }}"
     name: "{{ postgres_group }}"
@@ -25,24 +25,25 @@
 
 - name: Ensure custom Postgres directories exist
   ansible.builtin.file:
-    path: "{{ item }}"
+    path: "{{ (item | string).split(':')[0] }}"
     state: directory
-    owner: 999
+    owner: "{{ postgres_uid }}"
     group: "{{ postgres_gid }}"
     mode: "0700"
   with_items: "{{ postgres_volumes }}"
 
 - name: Pull Postgres container image.
   community.docker.docker_image:
-    name: "{{ postgres_server_image }}"
+    force_source: true
+    name: "{{ postgres_image }}"
     source: pull
-    tag: "{{ postgres_server_version }}"
+    tag: "{{ postgres_version }}"
   notify: Remove postgres
 
 - name: Ensure all handlers run before continuing
   ansible.builtin.meta: flush_handlers
 
-- name: If part of multiple containers deployment, ensure network exists
+- name: If part of multiple containers deployment, ensure docker network exists
   community.docker.docker_network:
     name: "{{ postgres_docker_network }}"
   when: postgres_docker_network | length > 0
