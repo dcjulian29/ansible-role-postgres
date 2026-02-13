@@ -48,16 +48,26 @@
     name: "{{ postgres_docker_network }}"
   when: postgres_docker_network | length > 0
 
+- name: Add Postgres docker data volume
+  set_fact:
+    d_volumes: "{{ postgres_volume_data }}"
+
+- name: Build a list of all remaining custom docker volumes
+  set_fact:
+    d_volumes: "{{ d_volumes }}|{{ item }}"
+  with_items: "{{ postgres_volumes }}"
+  when: postgres_volumes | length > 0
+
 - name: Ensure Postgres container is created.
   community.docker.docker_container:
     container_default_behavior: no_defaults
     detach: true
     env:
-      TZ: "{{ ansible_date_time.tz }}"
+      TZ: "{{ ansible_facts['date_time'].tz }}"
       POSTGRES_DB: "{{ postgres_database_name }}"
       POSTGRES_USER: "{{ postgres_database_user }}"
       POSTGRES_PASSWORD: "{{ postgres_database_password }}"
-    image: "{{ postgres_server_image }}:{{ postgres_server_version }}"
+    image: "{{ postgres_image }}:{{ postgres_version }}"
     interactive: false
     name: "{{ postgres_name }}"
     networks: >-
@@ -65,14 +75,10 @@
         [ { 'name': postgres_docker_network } ]
         if postgres_docker_network | length > 0 else omit
       }}
-    published_ports: >-
-        {{
-          [ postgres_server_port ~ ':5432' ]
-          if postgres_server_port_exposed else omit
-        }}
+    ports: "{{ postgres_port | string + ':5432' if postgres_port_exposed else omit }}"
     restart_policy: always
     state: present
-    volumes: "{{ postgres_volumes_docker }}"
+    volumes: "{{ d_volumes.split('|') }}"
     user: "0:{{ postgres_gid }}"
   notify: Restart postgres
 
