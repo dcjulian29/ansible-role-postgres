@@ -49,11 +49,11 @@
   when: postgres_docker_network | length > 0
 
 - name: Add Postgres docker data volume
-  set_fact:
+  ansible.builtin.set_fact:
     d_volumes: "{{ postgres_volume_data }}"
 
 - name: Build a list of all remaining custom docker volumes
-  set_fact:
+  ansible.builtin.set_fact:
     d_volumes: "{{ d_volumes }}|{{ item }}"
   with_items: "{{ postgres_volumes }}"
   when: postgres_volumes | length > 0
